@@ -191,7 +191,7 @@ usuário inicia a reprodução.
 ## Segurança e operação
 
 - O proxy aceita apenas URLs assinadas pelo próprio servidor.
-- Destinos HTTP, endereços privados e URLs com credenciais são rejeitados.
+- Destinos HTTP, endereços privados, hosts locais e URLs com credenciais são rejeitados.
 - Defina um `PROXY_SECRET` permanente em produção.
 - Não exponha chaves ou arquivos `.env` no GitHub.
 - Monitore memória, banda e número de conexões antes de ampliar o acesso.

@@ -1,0 +1,32 @@
+{
+  "id": "org.nuvioplugin.embedtv.live",
+  "version": "0.1.0",
+  "name": "EmbedTV Ao Vivo",
+  "description": "Catálogo experimental de canais ao vivo para Nuvio",
+  "resources": ["catalog", "meta", "stream"],
+  "types": ["tv"],
+  "catalogs": [
+    { "type": "tv", "id": "embedtv-live", "name": "Todos os canais", "extra": [{ "name": "search", "isRequired": false }] },
+    { "type": "tv", "id": "embedtv-globo", "name": "Globo", "extra": [{ "name": "search", "isRequired": false }] },
+    { "type": "tv", "id": "embedtv-band", "name": "Band", "extra": [{ "name": "search", "isRequired": false }] },
+    { "type": "tv", "id": "embedtv-premiere", "name": "Premiere", "extra": [{ "name": "search", "isRequired": false }] },
+    { "type": "tv", "id": "embedtv-telecine", "name": "Telecine", "extra": [{ "name": "search", "isRequired": false }] },
+    { "type": "tv", "id": "embedtv-hbo", "name": "HBO", "extra": [{ "name": "search", "isRequired": false }] },
+    { "type": "tv", "id": "embedtv-espn", "name": "ESPN", "extra": [{ "name": "search", "isRequired": false }] },
+    { "type": "tv", "id": "embedtv-sportv", "name": "SporTV", "extra": [{ "name": "search", "isRequired": false }] },
+    { "type": "tv", "id": "embedtv-cazetv", "name": "CazéTV", "extra": [{ "name": "search", "isRequired": false }] },
+    { "type": "tv", "id": "embedtv-discovery", "name": "Discovery", "extra": [{ "name": "search", "isRequired": false }] },
+    { "type": "tv", "id": "embedtv-disney", "name": "Disney", "extra": [{ "name": "search", "isRequired": false }] },
+    { "type": "tv", "id": "embedtv-record", "name": "Record", "extra": [{ "name": "search", "isRequired": false }] },
+    { "type": "tv", "id": "embedtv-sbt", "name": "SBT", "extra": [{ "name": "search", "isRequired": false }] },
+    { "type": "tv", "id": "embedtv-esportes", "name": "Esportes", "extra": [{ "name": "search", "isRequired": false }] },
+    { "type": "tv", "id": "embedtv-24h", "name": "24 Horas", "extra": [{ "name": "search", "isRequired": false }] },
+    { "type": "tv", "id": "embedtv-abertos", "name": "Canais abertos", "extra": [{ "name": "search", "isRequired": false }] },
+    { "type": "tv", "id": "embedtv-noticias", "name": "Notícias", "extra": [{ "name": "search", "isRequired": false }] },
+    { "type": "tv", "id": "embedtv-infantil", "name": "Infantil", "extra": [{ "name": "search", "isRequired": false }] },
+    { "type": "tv", "id": "embedtv-filmes-series", "name": "Filmes e Séries", "extra": [{ "name": "search", "isRequired": false }] },
+    { "type": "tv", "id": "embedtv-documentarios", "name": "Documentários", "extra": [{ "name": "search", "isRequired": false }] },
+    { "type": "tv", "id": "embedtv-variedades", "name": "Variedades", "extra": [{ "name": "search", "isRequired": false }] },
+    { "type": "tv", "id": "embedtv-portugal", "name": "Portugal", "extra": [{ "name": "search", "isRequired": false }] }
+  ]
+}

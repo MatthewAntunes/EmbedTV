@@ -3,6 +3,7 @@ const dns = require('dns').promises;
 const net = require('net');
 const express = require('express');
 const cors = require('cors');
+const manifest = require('./manifest.json');
 
 const PORT = Number(process.env.PORT || 3100);
 const API_URL = 'https://embedtv.lat/api/channels';
@@ -46,21 +47,6 @@ const CATALOGS = [
   { id: 'embedtv-variedades', name: 'Variedades', genre: 'Variedades' },
   { id: 'embedtv-portugal', name: 'Portugal', genre: 'Portugal' }
 ];
-
-const manifest = {
-  id: 'org.nuvioplugin.embedtv.live',
-  version: '0.1.0',
-  name: 'EmbedTV Ao Vivo',
-  description: 'Catálogo experimental de canais ao vivo para Nuvio',
-  resources: ['catalog', 'meta', 'stream'],
-  types: ['tv'],
-  catalogs: CATALOGS.map(catalog => ({
-    type: 'tv',
-    id: catalog.id,
-    name: catalog.name,
-    extra: [{ name: 'search', isRequired: false }]
-  }))
-};
 
 let channelCache = { expiresAt: 0, value: null };
 const streamCache = new Map();
@@ -219,13 +205,37 @@ function isPrivateIp(address) {
   return true;
 }
 
+function resolveWithTimeout(hostname, ms = 1500) {
+  return Promise.race([
+    Promise.allSettled([dns.resolve4(hostname), dns.resolve6(hostname)]),
+    new Promise((resolve) => setTimeout(() => resolve([]), ms))
+  ]);
+}
+
 async function assertPublicHttps(rawUrl) {
   const url = new URL(rawUrl);
   if (url.protocol !== 'https:') throw new Error('Somente HTTPS é permitido');
   if (url.username || url.password) throw new Error('Credenciais na URL não são permitidas');
-  const results = await dns.lookup(url.hostname, { all: true });
-  if (!results.length || results.some(result => isPrivateIp(result.address))) {
+  const hostname = url.hostname.toLowerCase().replace(/\.$/, '');
+  if (hostname === 'localhost' || hostname.endsWith('.localhost') ||
+      hostname.endsWith('.local') || hostname.endsWith('.internal')) {
     throw new Error('Destino de rede não permitido');
+  }
+  if (net.isIP(hostname) && isPrivateIp(hostname)) throw new Error('Destino de rede não permitido');
+  if (!net.isIP(hostname)) {
+    let addresses = [];
+    let lastError;
+    for (const delay of [0, 150, 500]) {
+      if (delay) await new Promise(resolve => setTimeout(resolve, delay));
+      const results = await resolveWithTimeout(hostname);
+      addresses = results
+        .filter(result => result.status === 'fulfilled')
+        .flatMap(result => result.value);
+      if (addresses.length) break;
+      lastError = results.find(result => result.status === 'rejected')?.reason;
+    }
+    if (!addresses.length) throw lastError || new Error('Não foi possível resolver o destino');
+    if (addresses.some(isPrivateIp)) throw new Error('Destino de rede não permitido');
   }
   return url;
 }

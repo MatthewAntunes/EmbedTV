@@ -1,6 +1,6 @@
 {
   "id": "org.nuvioplugin.embedtv.live",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "name": "EmbedTV Ao Vivo",
   "description": "Catálogo experimental de canais ao vivo para Nuvio",
   "resources": ["catalog", "meta", "stream"],

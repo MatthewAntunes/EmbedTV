@@ -26,6 +26,7 @@ primeira abertura pode levar aproximadamente 50 segundos enquanto a instância
 - Catálogos separados por gênero e por rede.
 - Busca de canais pelo Nuvio.
 - Resolução do stream sob demanda.
+- Opção de player externo para origens que bloqueiam datacenters estrangeiros.
 - Suporte a playlists HLS com extensão `.m3u8` ou `.txt`.
 - Reescrita de playlists, segmentos e URLs relativas.
 - Detecção de segmentos MPEG-TS com extensões não convencionais.

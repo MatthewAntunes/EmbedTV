@@ -1,6 +1,6 @@
 {
   "name": "embedtv-live-nuvio",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Servidor de teste para catalogar canais ao vivo no Nuvio",
   "main": "server.js",

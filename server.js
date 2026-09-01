@@ -320,12 +320,19 @@ app.get('/stream/tv/:id.json', async (req, res) => {
     if (!channel) return res.status(404).json({ streams: [] });
     const resolved = await resolveChannel(channel);
     res.json({
-      streams: [{
-        name: 'EmbedTV Ao Vivo',
-        title: `▶ ${channel.name}`,
-        url: proxyUrl(req, resolved.url, resolved.headers),
-        behaviorHints: { notWebReady: false }
-      }]
+      streams: [
+        {
+          name: 'EmbedTV Ao Vivo',
+          title: `▶ ${channel.name} — Player nativo`,
+          url: proxyUrl(req, resolved.url, resolved.headers),
+          behaviorHints: { notWebReady: false }
+        },
+        {
+          name: 'EmbedTV Player',
+          title: `🌐 ${channel.name} — Abrir player original`,
+          externalUrl: channel.url
+        }
+      ]
     });
   } catch (error) {
     console.error('[stream]', error.message);

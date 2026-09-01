@@ -133,6 +133,9 @@ function extractStreamUrl(html) {
   const patterns = [
     /var\s+src\s*=\s*["']([^"']+)["']/i,
     /startPlayer\(\s*["']([^"']+)["']\s*\)/i,
+    /source\s*:\s*["']([^"']+)["']/i,
+    /file\s*:\s*["']([^"']+)["']/i,
+    /src\s*:\s*["']([^"']+)["']/i,
     /["'](https?:\/\/[^"']+(?:\.m3u8|\/file\.txt)(?:\?[^"']*)?)["']/i
   ];
   for (const pattern of patterns) {
@@ -325,7 +328,12 @@ app.get('/stream/tv/:id.json', async (req, res) => {
           name: 'EmbedTV Ao Vivo',
           title: `▶ ${channel.name} — Player nativo`,
           url: proxyUrl(req, resolved.url, resolved.headers),
-          behaviorHints: { notWebReady: false }
+          behaviorHints: {
+            notWebReady: false,
+            proxyHeaders: {
+              request: resolved.headers
+            }
+          }
         },
         {
           name: 'EmbedTV Player',

@@ -130,18 +130,19 @@ function toMeta(channel) {
 }
 
 function extractStreamUrl(html) {
-  const patterns = [
-    /var\s+src\s*=\s*["']([^"']+)["']/i,
-    /startPlayer\(\s*["']([^"']+)["']\s*\)/i,
-    /source\s*:\s*["']([^"']+)["']/i,
-    /file\s*:\s*["']([^"']+)["']/i,
-    /src\s*:\s*["']([^"']+)["']/i,
-    /["'](https?:\/\/[^"']+(?:\.m3u8|\/file\.txt)(?:\?[^"']*)?)["']/i
-  ];
-  for (const pattern of patterns) {
-    const match = html.match(pattern);
-    if (match && match[1]) return match[1].replace(/\\\//g, '/');
+  const varSrcMatch = html.match(/var\s+src\s*=\s*["'](https?:\/\/[^"']+)["']/i);
+  if (varSrcMatch && !varSrcMatch[1].includes('live-chunks.mediacdn.net')) {
+    return varSrcMatch[1].replace(/\\\//g, '/');
   }
+
+  const m3u8Matches = [...html.matchAll(/["'](https?:\/\/[^"']+(?:\.m3u8|\/file\.txt)[^"']*)["']/gi)];
+  for (const match of m3u8Matches) {
+    const url = match[1].replace(/\\\//g, '/');
+    if (!url.includes('live-chunks.mediacdn.net') && !url.includes('a.mp4')) {
+      return url;
+    }
+  }
+
   return null;
 }
 

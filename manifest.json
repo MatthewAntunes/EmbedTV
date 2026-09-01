@@ -1,10 +1,11 @@
 {
   "id": "org.nuvioplugin.embedtv.live",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "name": "EmbedTV Ao Vivo",
   "description": "Catálogo experimental de canais ao vivo para Nuvio",
   "resources": ["catalog", "meta", "stream"],
   "types": ["tv"],
+  "idPrefixes": ["embedtv:"],
   "catalogs": [
     { "type": "tv", "id": "embedtv-live", "name": "Todos os canais", "extra": [{ "name": "search", "isRequired": false }] },
     { "type": "tv", "id": "embedtv-globo", "name": "Globo", "extra": [{ "name": "search", "isRequired": false }] },

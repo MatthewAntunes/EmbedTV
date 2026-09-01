@@ -208,16 +208,9 @@ function isPrivateIp(address) {
   return true;
 }
 
-function resolveWithTimeout(hostname, ms = 1500) {
-  return Promise.race([
-    Promise.allSettled([dns.resolve4(hostname), dns.resolve6(hostname)]),
-    new Promise((resolve) => setTimeout(() => resolve([]), ms))
-  ]);
-}
-
 async function assertPublicHttps(rawUrl) {
   const url = new URL(rawUrl);
-  if (url.protocol !== 'https:') throw new Error('Somente HTTPS é permitido');
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') throw new Error('Somente HTTP/HTTPS é permitido');
   if (url.username || url.password) throw new Error('Credenciais na URL não são permitidas');
   const hostname = url.hostname.toLowerCase().replace(/\.$/, '');
   if (hostname === 'localhost' || hostname.endsWith('.localhost') ||
@@ -225,31 +218,17 @@ async function assertPublicHttps(rawUrl) {
     throw new Error('Destino de rede não permitido');
   }
   if (net.isIP(hostname) && isPrivateIp(hostname)) throw new Error('Destino de rede não permitido');
-  if (!net.isIP(hostname)) {
-    let addresses = [];
-    let lastError;
-    for (const delay of [0, 150, 500]) {
-      if (delay) await new Promise(resolve => setTimeout(resolve, delay));
-      const results = await resolveWithTimeout(hostname);
-      addresses = results
-        .filter(result => result.status === 'fulfilled')
-        .flatMap(result => result.value);
-      if (addresses.length) break;
-      lastError = results.find(result => result.status === 'rejected')?.reason;
-    }
-    if (!addresses.length) throw lastError || new Error('Não foi possível resolver o destino');
-    if (addresses.some(isPrivateIp)) throw new Error('Destino de rede não permitido');
-  }
   return url;
 }
 
-function proxyUrl(req, targetUrl, headers) {
+function proxyUrl(req, targetUrl, headers, isPlaylist = true) {
   const token = encodeProxyPayload({
     url: targetUrl,
     headers,
-    exp: Date.now() + 2 * 60 * 60 * 1000
+    exp: Date.now() + 4 * 60 * 60 * 1000
   });
-  return `${requestBase(req)}/proxy/${token}`;
+  const suffix = isPlaylist ? '/stream.m3u8' : '/segment.ts';
+  return `${requestBase(req)}/proxy/${token}${suffix}`;
 }
 
 function looksLikePlaylist(buffer, contentType) {
@@ -268,13 +247,15 @@ function rewritePlaylist(req, text, sourceUrl, headers) {
     if (!trimmed) return line;
 
     if (!trimmed.startsWith('#')) {
-      return proxyUrl(req, new URL(trimmed, sourceUrl).href, headers);
+      const isSubPlaylist = trimmed.includes('.m3u8') || trimmed.includes('/file.txt');
+      return proxyUrl(req, new URL(trimmed, sourceUrl).href, headers, isSubPlaylist);
     }
 
     return line.replace(/URI=("([^"]+)"|'([^']+)')/g, (whole, quoted, doubleUri, singleUri) => {
       const uri = doubleUri || singleUri;
       const quote = quoted[0];
-      return `URI=${quote}${proxyUrl(req, new URL(uri, sourceUrl).href, headers)}${quote}`;
+      const isSub = uri.includes('.m3u8') || uri.includes('/file.txt');
+      return `URI=${quote}${proxyUrl(req, new URL(uri, sourceUrl).href, headers, isSub)}${quote}`;
     });
   }).join('\n');
 }
@@ -325,9 +306,9 @@ app.get('/stream/tv/:id.json', async (req, res) => {
     res.json({
       streams: [
         {
-          name: 'EmbedTV Ao Vivo',
-          title: `▶ ${channel.name} — Player nativo`,
-          url: proxyUrl(req, resolved.url, resolved.headers),
+          name: 'EmbedTV [HLS Proxy]',
+          title: `▶ ${channel.name} (HLS Stream)`,
+          url: proxyUrl(req, resolved.url, resolved.headers, true),
           behaviorHints: {
             notWebReady: false,
             proxyHeaders: {
@@ -336,7 +317,18 @@ app.get('/stream/tv/:id.json', async (req, res) => {
           }
         },
         {
-          name: 'EmbedTV Player',
+          name: 'EmbedTV [Direto]',
+          title: `⚡ ${channel.name} (Stream Direto)`,
+          url: resolved.url,
+          behaviorHints: {
+            notWebReady: false,
+            proxyHeaders: {
+              request: resolved.headers
+            }
+          }
+        },
+        {
+          name: 'EmbedTV Web',
           title: `🌐 ${channel.name} — Abrir player original`,
           externalUrl: channel.url
         }
@@ -348,7 +340,7 @@ app.get('/stream/tv/:id.json', async (req, res) => {
   }
 });
 
-app.get('/proxy/:token', async (req, res) => {
+app.get(['/proxy/:token', '/proxy/:token/:file'], async (req, res) => {
   try {
     const payload = decodeProxyPayload(req.params.token);
     const target = await assertPublicHttps(payload.url);
@@ -367,7 +359,7 @@ app.get('/proxy/:token', async (req, res) => {
       return res.send(rewritePlaylist(req, body, target.href, payload.headers || {}));
     }
 
-    res.type(looksLikeTransportStream(buffer) ? 'video/MP2T' : contentType);
+    res.type(looksLikeTransportStream(buffer) ? 'video/MP2T' : (contentType.includes('text/html') ? 'video/MP2T' : contentType));
     if (contentLength) res.setHeader('Content-Length', contentLength);
     res.send(buffer);
   } catch (error) {

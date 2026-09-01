@@ -7,6 +7,18 @@ O servidor consulta o catálogo remoto, organiza os canais em coleções, resolv
 o stream somente no momento da reprodução e entrega playlists HLS por meio de
 um proxy com URLs temporárias assinadas.
 
+## Instalar no Nuvio
+
+Use o endereço público abaixo na área de addons do Nuvio:
+
+```text
+https://embedtv-nuvio.onrender.com/manifest.json
+```
+
+O serviço usa uma instância gratuita do Render. Após um período sem acessos, a
+primeira abertura pode levar aproximadamente 50 segundos enquanto a instância
+é reativada.
+
 ## Recursos
 
 - Catálogo com 141 canais no momento da última validação.
@@ -65,9 +77,9 @@ npm install
 npm start
 ```
 
-O servidor será iniciado em `http://localhost:3100`.
+O servidor local será iniciado em `http://localhost:3100`.
 
-Adicione este endereço no Nuvio:
+Para testar especificamente a versão local no Nuvio, use:
 
 ```text
 http://localhost:3100/manifest.json
@@ -125,15 +137,15 @@ Health Check Path: /health
 
 ```text
 NODE_ENV=production
-PUBLIC_URL=https://SEU-SERVICO.onrender.com
+PUBLIC_URL=https://embedtv-nuvio.onrender.com
 PROXY_SECRET=UM_SEGREDO_LONGO_E_ALEATORIO
 REQUEST_TIMEOUT_MS=10000
 ```
 
-6. Após o deploy, instale no Nuvio:
+6. Para este deploy, o endereço de instalação no Nuvio é:
 
 ```text
-https://SEU-SERVICO.onrender.com/manifest.json
+https://embedtv-nuvio.onrender.com/manifest.json
 ```
 
 O Render define `PORT` automaticamente. Não é necessário cadastrar essa
